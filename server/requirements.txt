@@ -1,0 +1,17 @@
+fastapi[all]
+langchain
+langgraph==0.5.2 
+langchain-core
+langchain-community
+langchain-groq
+langchain-openai==0.3.27
+ta==0.11.0
+yfinance==0.2.65
+markitdown==0.1.2 
+SQLAlchemy
+bcrypt==4.3.0
+cryptography==45.0.4
+passlib==1.7.4
+python-jose==3.5.0
+plotly==5.24.1
+scikit-learn
