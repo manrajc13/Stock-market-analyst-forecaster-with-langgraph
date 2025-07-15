@@ -14,6 +14,7 @@ export default function Bot() {
   const [currentView, setCurrentView] = useState("initial") // 'initial', 'trending', 'analysis'
   const [selectedTicker, setSelectedTicker] = useState("")
   const [analysisData, setAnalysisData] = useState(null)
+  const [isLoading, setIsLoading] = useState(false);
 
   // Mock data for trending stocks
   const trendingStocks = [
@@ -47,49 +48,62 @@ export default function Bot() {
     setCurrentView("trending")
   }
 
-  const handleStartAnalysis = async () => {
-    if (selectedTicker) {
-        try {
-            const requestBody = {
-                query: "Should I buy this stock",
-                ticker: selectedTicker
-            };
+  // Replace the existing handleTrendingClick function with this:
+const handleTrendingClick = (stock) => {
+  setCurrentView("initial")
+  setSelectedTicker(stock)
+  // Pass the stock directly to avoid state update delay
+  handleStartAnalysis(stock);
+}
 
-            const response = await API.post("/query", requestBody);
-            const backendData = response.data;
-            console.log(backendData);
+// Update handleStartAnalysis to accept an optional ticker parameter:
+const handleStartAnalysis = async (ticker = null) => {
+  const tickerToUse = ticker || selectedTicker;
+  
+  if (tickerToUse) {
+      setIsLoading(true);
+      try {
+          const requestBody = {
+              query: "Should I buy this stock",
+              ticker: tickerToUse
+          };
 
-            // Reformat news data from object to array
-            const formattedNews = Object.entries(backendData.sentiment.news_rating).map(
-                ([title, [rating, url]]) => ({
-                    title,
-                    sentiment: rating,
-                    url: url
-                })
-            );
+          const response = await API.post("/query", requestBody);
+          const backendData = response.data;
+          console.log(backendData);
 
-            // Reconstruct the analysis data with formatted news
-            // Note: The 'charts' key is gone. The figures and analysis_summary are now top-level.
-            const analysisData = {
-                ...backendData,
-                sentiment: {
-                    ...backendData.sentiment,
-                    news: formattedNews,
-                    overallSentiment: backendData.sentiment.investment_recommendation,
-                    sentimentScore: backendData.sentiment.sentiment_score,
-                    summary: backendData.sentiment.overall_news_summary
-                }
-            };
+          // Reformat news data from object to array
+          const formattedNews = Object.entries(backendData.sentiment.news_rating).map(
+              ([title, [rating, url]]) => ({
+                  title,
+                  sentiment: rating,
+                  url: url
+              })
+          );
 
-            setAnalysisData(analysisData);
-            setCurrentView("analysis");
+          // Reconstruct the analysis data with formatted news
+          const analysisData = {
+              ...backendData,
+              sentiment: {
+                  ...backendData.sentiment,
+                  news: formattedNews,
+                  overallSentiment: backendData.sentiment.investment_recommendation,
+                  sentimentScore: backendData.sentiment.sentiment_score,
+                  summary: backendData.sentiment.overall_news_summary
+              }
+          };
 
-        } catch (error) {
-            console.error("Error fetching analysis data:", error);
-            setAnalysisData(null);
-            alert("Failed to fetch analysis data. Please try again.");
-        }
-    }
+          setAnalysisData(analysisData);
+          setCurrentView("analysis");
+
+      } catch (error) {
+          console.error("Error fetching analysis data:", error);
+          setAnalysisData(null);
+          alert("Failed to fetch analysis data. Please try again.");
+      } finally {
+          setIsLoading(false);
+      }
+  }
 };
 
   const handleNewAnalysis = () => {
@@ -113,6 +127,50 @@ export default function Bot() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-black">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="text-center">
+            {/* Animated Loading Spinner */}
+            <div className="relative w-32 h-32 mx-auto mb-8">
+              <div className="absolute inset-0 border-4 border-green-200 border-opacity-20 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+              <div className="absolute inset-4 border-4 border-green-300 border-opacity-40 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+            </div>
+            
+            {/* Loading Text */}
+            <div className="text-white text-xl font-semibold mb-4">
+              Analyzing {selectedTicker}...
+            </div>
+            
+            {/* Loading Steps */}
+            <div className="text-green-400 text-sm space-y-2">
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span>Fetching market data</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                <span>Analyzing sentiment</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+                <span>Generating insights</span>
+              </div>
+            </div>
+            
+            {/* Animated Bars */}
+            <div className="flex justify-center space-x-1 mt-8">
+              <div className="w-2 h-8 bg-green-400 rounded animate-pulse" style={{ animationDelay: '0s' }}></div>
+              <div className="w-2 h-6 bg-green-400 rounded animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-10 bg-green-400 rounded animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+              <div className="w-2 h-4 bg-green-400 rounded animate-pulse" style={{ animationDelay: '0.6s' }}></div>
+              <div className="w-2 h-8 bg-green-400 rounded animate-pulse" style={{ animationDelay: '0.8s' }}></div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="flex justify-end gap-3 p-6">
         <Button
@@ -185,32 +243,35 @@ export default function Bot() {
                       Detailed Stock Analysis
                     </h4>
                     <p className="text-gray-400 mb-4">
-                      Select a ticker for comprehensive AI insights, charts, and finance news sentiment analysis
-                    </p>
-                    <div className="flex gap-4 items-end">
-                      <div className="flex-1">
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Select Ticker</label>
-                        <Select value={selectedTicker} onValueChange={setSelectedTicker}>
-                          <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                            <SelectValue placeholder="Choose a stock ticker" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-gray-800 border-gray-600">
-                            {tickerOptions.map((ticker) => (
-                              <SelectItem key={ticker} value={ticker} className="text-white hover:bg-gray-700">
-                                {ticker}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <Button
-                        onClick={handleStartAnalysis}
-                        disabled={!selectedTicker}
-                        className="bg-gradient-to-r from-green-600 to-green-800 text-white hover:from-green-700 hover:to-green-900 transition-all duration-200 disabled:opacity-50"
-                      >
-                        Start Analysis
-                      </Button>
-                    </div>
+                Select a ticker for comprehensive AI insights, charts, and finance news sentiment analysis
+              </p>
+              <div className="flex gap-4 items-end">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Select or Enter Ticker</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={selectedTicker}
+                      onChange={(e) => setSelectedTicker(e.target.value.toUpperCase())}
+                      placeholder="Type ticker (e.g., AAPL) or select from dropdown"
+                      className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      list="ticker-options"
+                    />
+                    <datalist id="ticker-options">
+                      {tickerOptions.map((ticker) => (
+                        <option key={ticker} value={ticker} />
+                      ))}
+                    </datalist>
+                  </div>
+                </div>
+                <Button
+                  onClick={handleStartAnalysis}
+                  disabled={!selectedTicker || selectedTicker.length === 0 || isLoading}
+                  className="bg-gradient-to-r from-green-600 to-green-800 text-white hover:from-green-700 hover:to-green-900 transition-all duration-200 disabled:opacity-50"
+                >
+                  {isLoading ? "Analyzing..." : "Start Analysis"}
+                </Button>
+              </div>
                   </div>
                 </div>
               )}
@@ -221,27 +282,34 @@ export default function Bot() {
                   <h3 className="text-xl font-semibold text-white text-center mb-6">Top 5 Trending Stocks</h3>
                   <div className="grid gap-4">
                     {trendingStocks.map((stock, index) => (
-                      <div
-                        key={stock.ticker}
-                        className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-green-600 transition-all duration-200"
-                      >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="text-lg font-semibold text-white">{stock.ticker}</h4>
-                            <p className="text-gray-400 text-sm">{stock.name}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className={`text-lg font-bold ${stock.change >= 0 ? "text-green-400" : "text-red-400"}`}>
-                              {stock.change >= 0 ? "+" : ""}
-                              {stock.change.toFixed(2)}
-                            </p>
-                            <p className={`text-sm ${stock.changePercent >= 0 ? "text-green-400" : "text-red-400"}`}>
-                              ({stock.changePercent >= 0 ? "+" : ""}
-                              {stock.changePercent.toFixed(2)}%)
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+            <button
+  key={stock.ticker}
+  onClick={() => handleTrendingClick(stock.ticker)}
+  className="w-full bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-green-600 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer relative group"
+>
+  <div className="flex justify-between items-center">
+    <div className="text-left">
+      <h4 className="text-lg font-semibold text-white">{stock.ticker}</h4>
+      <p className="text-gray-400 text-sm">{stock.name}</p>
+    </div>
+    <div className="text-right">
+      <p className={`text-lg font-bold ${stock.change >= 0 ? "text-green-400" : "text-red-400"}`}>
+        {stock.change >= 0 ? "+" : ""}
+        {stock.change.toFixed(2)}
+      </p>
+      <p className={`text-sm ${stock.changePercent >= 0 ? "text-green-400" : "text-red-400"}`}>
+        ({stock.changePercent >= 0 ? "+" : ""}
+        {stock.changePercent.toFixed(2)}%)
+      </p>
+    </div>
+  </div>
+  
+  {/* Tooltip - positioned absolutely and won't affect layout */}
+  <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+    Get AI insights
+    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+  </div>
+</button>
                     ))}
                   </div>
                 </div>
@@ -340,9 +408,9 @@ export default function Bot() {
                                 <p className="text-sm text-gray-400 mb-2">Recommendation</p>
                                 <p
                                   className={`text-2xl font-bold mb-3 ${
-                                    analysisData.aiInsights.investment_recommendation.verdict === "BUY"
+                                    analysisData.aiInsights.investment_recommendation.verdict.toUpperCase() === "BUY"
                                       ? "text-green-400"
-                                      : analysisData.aiInsights.investment_recommendation.verdict === "SELL"
+                                      : analysisData.aiInsights.investment_recommendation.verdict.toUpperCase() === "SELL"
                                       ? "text-red-400"
                                       : "text-yellow-400"
                                   }`}
@@ -370,29 +438,7 @@ export default function Bot() {
                         </div>
                       </div>
                     </TabsContent>
-
-                    {/* Charts Tab
-                    <TabsContent value="charts" className="mt-6">
-                      <div className="space-y-6">
-                        {analysisData.charts.map((chart) => (
-                          <div key={chart.id} className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-                            <h4 className="text-lg font-semibold text-white mb-4">{chart.title}</h4>
-                            <div className="bg-gray-700 rounded-lg p-4 min-h-[300px] flex items-center justify-center">
-                              <div className="text-center">
-                                <BarChart3 className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                                <p className="text-gray-400">Chart visualization would render here</p>
-                                <p className="text-sm text-gray-500 mt-2">
-                                  Plotly JSON: {JSON.stringify(chart.data).substring(0, 100)}...
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </TabsContent> */}
-
-
-                                    {/* Charts Tab */}
+                {/* Charts Tab */}
                 <TabsContent value="charts" className="mt-6">
                   <div className="space-y-6">
                     {/* Loop through the figures object and render each chart */}
@@ -463,17 +509,16 @@ export default function Bot() {
                           <h4 className="text-lg font-semibold text-white mb-4">Recent News Analysis</h4>
                           <div className="space-y-3">
                             {analysisData.sentiment.news.map((item, index) => (
-                              <div key={index} className="bg-gray-700 rounded-lg p-4 flex justify-between items-center">
-                                <div className="flex-1">
-                                  <p className="text-white font-medium">{item.title}</p>
-                                </div>
-                                <div className="text-right ml-4">
-                                  <p className={`font-semibold ${getSentimentColor(item.sentiment)}`}>
-                                    {item.sentiment}
-                                  </p>
-                                  {/* <p className="text-sm text-gray-400">Score: {item.score.toFixed(2)}</p> */}
-                                </div>
+                            <div key={index} className="bg-gray-700 rounded-lg p-4 flex justify-between items-center hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer">
+                              <div className="flex-1">
+                                <a href={item.url} target="_blank"><p className="text-white font-medium">{item.title}</p></a>
                               </div>
+                              <div className="text-right ml-4">
+                                <p className={`font-semibold ${getSentimentColor(item.sentiment)}`}>
+                                  {item.sentiment}
+                                </p>
+                              </div>
+                            </div>
                             ))}
                           </div>
                         </div>
