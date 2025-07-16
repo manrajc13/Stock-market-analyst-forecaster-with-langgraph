@@ -12,8 +12,8 @@ import Plot from 'react-plotly.js';
 
 export default function Bot() {
   const [currentView, setCurrentView] = useState("initial") // 'initial', 'trending', 'analysis'
-  const [selectedTicker, setSelectedTicker] = useState("")
-  const [analysisData, setAnalysisData] = useState(null)
+  const [selectedTicker, setSelectedTicker] = useState("");
+  const [analysisData, setAnalysisData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Mock data for trending stocks
@@ -56,53 +56,114 @@ const handleTrendingClick = (stock) => {
   handleStartAnalysis(stock);
 }
 
-// Update handleStartAnalysis to accept an optional ticker parameter:
+// // Update handleStartAnalysis to accept an optional ticker parameter:
+// const handleStartAnalysis = async (ticker = null) => {
+//   const tickerToUse = ticker || selectedTicker;
+//   console.log(tickerToUse);
+//   if (tickerToUse) {
+//       setIsLoading(true);
+//       try {
+//           const requestBody = {
+//               query: "Should I buy this stock",
+//               ticker: tickerToUse
+//           };
+
+//           const response = await API.post("/query", requestBody);
+//           const backendData = response.data;
+//           console.log(backendData);
+
+//           // Reformat news data from object to array
+//           const formattedNews = Object.entries(backendData.sentiment.news_rating).map(
+//               ([title, [rating, url]]) => ({
+//                   title,
+//                   sentiment: rating,
+//                   url: url
+//               })
+//           );
+
+//           // Reconstruct the analysis data with formatted news
+//           const analysisData = {
+//               ...backendData,
+//               sentiment: {
+//                   ...backendData.sentiment,
+//                   news: formattedNews,
+//                   overallSentiment: backendData.sentiment.investment_recommendation,
+//                   sentimentScore: backendData.sentiment.sentiment_score,
+//                   summary: backendData.sentiment.overall_news_summary
+//               }
+//           };
+
+//           setAnalysisData(analysisData);
+//           setCurrentView("analysis");
+
+//       } catch (error) {
+//           console.error("Error fetching analysis data:", error);
+//           setAnalysisData(null);
+//           alert("Failed to fetch analysis data. Please try again.");
+//       } finally {
+//           setIsLoading(false);
+//       }
+//   }
+// };
+
+// Fixed handleStartAnalysis function
 const handleStartAnalysis = async (ticker = null) => {
-  const tickerToUse = ticker || selectedTicker;
+  // const tickerToUse = ticker || selectedTicker;
+  const tickerToUse = "AAPL";
+  console.log("Ticker to use:", tickerToUse); // This should now show the correct ticker
   
   if (tickerToUse) {
-      setIsLoading(true);
-      try {
-          const requestBody = {
-              query: "Should I buy this stock",
-              ticker: tickerToUse
-          };
+    setIsLoading(true);
+    
+    // Update selectedTicker state for UI consistency
+    if (ticker) {
+      setSelectedTicker(ticker);
+    }
+    
+    try {
+      const requestBody = {
+        query: "Should I buy this stock",
+        ticker: tickerToUse
+      };
 
-          const response = await API.post("/query", requestBody);
-          const backendData = response.data;
-          console.log(backendData);
+      const response = await API.post("/query", requestBody);
+      const backendData = response.data;
+      console.log("Backend response:", backendData);
 
-          // Reformat news data from object to array
-          const formattedNews = Object.entries(backendData.sentiment.news_rating).map(
-              ([title, [rating, url]]) => ({
-                  title,
-                  sentiment: rating,
-                  url: url
-              })
-          );
+      // Reformat news data from object to array
+      const formattedNews = Object.entries(backendData.sentiment.news_rating).map(
+        ([title, [rating, url]]) => ({
+          title,
+          sentiment: rating,
+          url: url
+        })
+      );
 
-          // Reconstruct the analysis data with formatted news
-          const analysisData = {
-              ...backendData,
-              sentiment: {
-                  ...backendData.sentiment,
-                  news: formattedNews,
-                  overallSentiment: backendData.sentiment.investment_recommendation,
-                  sentimentScore: backendData.sentiment.sentiment_score,
-                  summary: backendData.sentiment.overall_news_summary
-              }
-          };
+      // Reconstruct the analysis data with formatted news
+      const analysisData = {
+        ...backendData,
+        sentiment: {
+          ...backendData.sentiment,
+          news: formattedNews,
+          overallSentiment: backendData.sentiment.investment_recommendation,
+          sentimentScore: backendData.sentiment.sentiment_score,
+          summary: backendData.sentiment.overall_news_summary
+        }
+      };
 
-          setAnalysisData(analysisData);
-          setCurrentView("analysis");
+      setAnalysisData(analysisData);
+      setCurrentView("analysis");
 
-      } catch (error) {
-          console.error("Error fetching analysis data:", error);
-          setAnalysisData(null);
-          alert("Failed to fetch analysis data. Please try again.");
-      } finally {
-          setIsLoading(false);
-      }
+    } catch (error) {
+      console.error("Error fetching analysis data:", error);
+      setAnalysisData(null);
+      alert("Failed to fetch analysis data. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  } else {
+    console.log("No ticker provided");
+    alert("Please select a ticker first");
   }
 };
 
@@ -252,7 +313,10 @@ const handleStartAnalysis = async (ticker = null) => {
                     <input
                       type="text"
                       value={selectedTicker}
-                      onChange={(e) => setSelectedTicker(e.target.value.toUpperCase())}
+                      onChange={(e) => { console.log(e.target.value.toUpperCase());
+                        setSelectedTicker(e.target.value.toUpperCase())
+                        console.log(selectedTicker);
+                      }}
                       placeholder="Type ticker (e.g., AAPL) or select from dropdown"
                       className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       list="ticker-options"
