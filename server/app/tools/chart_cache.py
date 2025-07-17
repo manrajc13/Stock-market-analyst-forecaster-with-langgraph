@@ -404,22 +404,10 @@ def stock_analysis_charts(symbol, save_html=False, filename_prefix=None):
     price_change_90d = ((data_90d['Close'].iloc[-1] - data_90d['Close'].iloc[0]) / data_90d['Close'].iloc[0]) * 100
     
     
-    # Save as HTML if requested
-    if save_html:
-        prefix = filename_prefix or f"{symbol.replace('.', '_')}_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        
-        for chart_name, fig in figures.items():
-            html_filename = f"{prefix}_{chart_name}.html"
-            fig.write_html(html_filename)
-            print(f"Chart saved as: {html_filename}")
     
-    # Show all charts
-    # for chart_name, fig in figures.items():
-        # print(f"\nDisplaying {chart_name} chart...")
-        # fig.show()
     
     json_figures = {name: fig.to_json() for name, fig in figures.items()}
-    print(json_figures)
+    # print(json_figures)
 
     return {
         'figures': json_figures,

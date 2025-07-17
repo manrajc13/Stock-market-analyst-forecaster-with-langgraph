@@ -56,60 +56,10 @@ const handleTrendingClick = (stock) => {
   handleStartAnalysis(stock);
 }
 
-// // Update handleStartAnalysis to accept an optional ticker parameter:
-// const handleStartAnalysis = async (ticker = null) => {
-//   const tickerToUse = ticker || selectedTicker;
-//   console.log(tickerToUse);
-//   if (tickerToUse) {
-//       setIsLoading(true);
-//       try {
-//           const requestBody = {
-//               query: "Should I buy this stock",
-//               ticker: tickerToUse
-//           };
-
-//           const response = await API.post("/query", requestBody);
-//           const backendData = response.data;
-//           console.log(backendData);
-
-//           // Reformat news data from object to array
-//           const formattedNews = Object.entries(backendData.sentiment.news_rating).map(
-//               ([title, [rating, url]]) => ({
-//                   title,
-//                   sentiment: rating,
-//                   url: url
-//               })
-//           );
-
-//           // Reconstruct the analysis data with formatted news
-//           const analysisData = {
-//               ...backendData,
-//               sentiment: {
-//                   ...backendData.sentiment,
-//                   news: formattedNews,
-//                   overallSentiment: backendData.sentiment.investment_recommendation,
-//                   sentimentScore: backendData.sentiment.sentiment_score,
-//                   summary: backendData.sentiment.overall_news_summary
-//               }
-//           };
-
-//           setAnalysisData(analysisData);
-//           setCurrentView("analysis");
-
-//       } catch (error) {
-//           console.error("Error fetching analysis data:", error);
-//           setAnalysisData(null);
-//           alert("Failed to fetch analysis data. Please try again.");
-//       } finally {
-//           setIsLoading(false);
-//       }
-//   }
-// };
 
 // Fixed handleStartAnalysis function
 const handleStartAnalysis = async (ticker = null) => {
-  // const tickerToUse = ticker || selectedTicker;
-  const tickerToUse = "AAPL";
+  const tickerToUse = ticker || selectedTicker;
   console.log("Ticker to use:", tickerToUse); // This should now show the correct ticker
   
   if (tickerToUse) {
