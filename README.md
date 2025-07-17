@@ -9,6 +9,14 @@ This application leverages a unified agentic workflow to provide:
 - **Real-time Charts**: Interactive stock price movement visualizations
 - **News Sentiment**: Real-time news analysis with sentiment scoring for informed decision making
 
+## Tech Stack
+**model**: OpenAI GPT4.o mini, deepseek-r1-distill-llama-70b
+**database**: PostgreSQL
+**authentication**: JWT Tokens using OAuth
+**Agentic Framework**: Langgraph, Langchain
+**Tools**: SerperDev, YFinance
+**Frontend**: Reactjs, TailwindCSS
+**Backend**: Fastapi
 ## Technical Analysis Framework
 
 Our system analyzes stocks using comprehensive financial metrics to classify market sentiment as **bullish**, **bearish**, or **sideways**:
@@ -44,3 +52,35 @@ Our system analyzes stocks using comprehensive financial metrics to classify mar
 Navigate to the server directory:
 ```bash
 cd server
+```
+Install Backend Dependencies
+```bash
+pip install -r requirments.txt
+```
+Setup .env file 
+```bash
+OPENAI_API_KEY=<your openai api key>
+groq_api_key_dev=<your groq api key>
+SERPER_API_KEY=<your serperdev api key>
+```
+Start server
+```bash
+uvicorn app.main: app -reload
+```
+
+### Frontend Setup
+
+Navigate to the client directory:
+```bash
+cd client
+```
+Install Frontend Dependencies 
+```bash
+npm install
+```
+Start Web app
+```bash
+npm run dev
+```
+
+
