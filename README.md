@@ -10,13 +10,14 @@ This application leverages a unified agentic workflow to provide:
 - **News Sentiment**: Real-time news analysis with sentiment scoring for informed decision making
 
 ## Tech Stack
-**model**: OpenAI GPT4.o mini, deepseek-r1-distill-llama-70b
-**database**: PostgreSQL
-**authentication**: JWT Tokens using OAuth
-**Agentic Framework**: Langgraph, Langchain
-**Tools**: SerperDev, YFinance
-**Frontend**: Reactjs, TailwindCSS
-**Backend**: Fastapi
+-**model**: OpenAI GPT4.o mini, deepseek-r1-distill-llama-70b
+-**database**: PostgreSQL
+-**authentication**: JWT Tokens using OAuth
+-**Agentic Framework**: Langgraph, Langchain
+-**Tools**: SerperDev, YFinance
+-**Frontend**: Reactjs, TailwindCSS
+-**Backend**: Fastapi
+
 ## Technical Analysis Framework
 
 Our system analyzes stocks using comprehensive financial metrics to classify market sentiment as **bullish**, **bearish**, or **sideways**:
