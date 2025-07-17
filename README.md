@@ -10,6 +10,8 @@ This application leverages a unified agentic workflow to provide:
 - **News Sentiment**: Real-time news analysis with sentiment scoring for informed decision making
 
 ## Tech Stack
+
+Following frameworks was used to build this platform
 -**model**: OpenAI GPT4.o mini, deepseek-r1-distill-llama-70b
 -**database**: PostgreSQL
 -**authentication**: JWT Tokens using OAuth
