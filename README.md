@@ -11,14 +11,15 @@ This application leverages a unified agentic workflow to provide:
 
 ## Tech Stack
 
-Following frameworks was used to build this platform
--**model**: OpenAI GPT4.o mini, deepseek-r1-distill-llama-70b
--**database**: PostgreSQL
--**authentication**: JWT Tokens using OAuth
--**Agentic Framework**: Langgraph, Langchain
--**Tools**: SerperDev, YFinance
--**Frontend**: Reactjs, TailwindCSS
--**Backend**: Fastapi
+Following frameworks was used to build this platform:
+
+- **Model**: OpenAI GPT4.o mini, deepseek-r1-distill-llama-70b
+- **Database**: PostgreSQL
+- **Authentication**: JWT Tokens using OAuth
+- **Agentic Framework**: Langgraph, Langchain
+- **Tools**: SerperDev, YFinance
+- **Frontend**: Reactjs, TailwindCSS
+- **Backend**: Fastapi
 
 ## Technical Analysis Framework
 
